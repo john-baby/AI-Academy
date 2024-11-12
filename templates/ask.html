@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ask a Question</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="chatbot-header">
+            <h1>Ask a Question</h1>
+            <p>Type your question about the PDF content below.</p>
+        </div>
+        <div class="chat-container">
+            <form action="/ask" method="post" class="question-form">
+                <input type="text" name="question" placeholder="Enter your question" required>
+                <button type="submit"><i class="fas fa-paper-plane"></i> Ask</button>
+            </form>
+            {% if answer %}
+                <div class="response">
+                    <h2>Answer:</h2>
+                    <p>{{ answer }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
