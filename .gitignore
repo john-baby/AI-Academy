@@ -62,7 +62,7 @@ db.sqlite3
 db.sqlite3-journal
 
 # Flask stuff:
-instance/
+backend/instance/
 .webassets-cache
 
 # Scrapy stuff:
@@ -128,10 +128,12 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+backend/app/.env
+backend/app/routes/.env
+backend/app/utils/.env
 .venv
 env/
-venv/
+backend/venv/
 ENV/
 env.bak/
 venv.bak/
@@ -169,3 +171,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+#react app
+frontend/
+frontend/node_modules
+
+#backend
+
+uploaded_documents/
