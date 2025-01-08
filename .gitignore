@@ -173,9 +173,7 @@ cython_debug/
 .pypirc
 
 #react app
-frontend/
 frontend/node_modules
-
 #backend
 
 uploaded_documents/
