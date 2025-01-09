@@ -16,11 +16,15 @@ const AITutor = () => {
       const response = await fetch("http://localhost:5000/model/chat/", {
         method: "POST",
         headers: {
+          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ chapter_name: input }),
       });
 
+      if (!response.ok) {
+        throw new Error("Failed to fetch response");
+      }
       setInput("");
       const data = await response.json();
       const systemMessage = { type: "system", text: data.response };

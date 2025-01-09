@@ -1,40 +1,89 @@
-import React, {useState, useEffect} from "react";
+// import React, {useState, useEffect} from "react";
+// import { Box, Typography, Grid, Paper, LinearProgress, Button } from "@mui/material";
+
+// const HomeScreen = ({ user = "User" }) => {
+//   // Sample progress data (Replace with actual data from your API or state)
+//   const progressData = {
+//     quizzesTaken: 7,
+//     totalQuizzes: 10,
+//     chaptersCompleted: 15,
+//     totalChapters: 20,
+//   };
+
+//   const [name, setName] = useState("");
+
+//   const fetchProfile = async () => {
+//       try {
+//         const response = await fetch("http://localhost:5000/auth/profile/", {
+//           method: "GET",
+//           headers: {
+//             "Content-Type": "application/json",
+//             "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Replace with your token logic
+//           },
+//         });
+  
+//         if (!response.ok) {
+//           throw new Error("Failed to fetch profile");
+//         }
+  
+//         const data = await response.json();
+//         setName(data.username || ""); // Adjust key names based on your backend
+//       } catch (error) {
+//         console.error("Error fetching profile:", error);
+//         alert("Error fetching profile. Please try again.");
+//       }
+//     };
+  
+//     useEffect(() => { fetchProfile(); }, []); // Fetch profile on component mount
+
+//   const calculatePercentage = (completed, total) => (completed / total) * 100;
+
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // For navigation
 import { Box, Typography, Grid, Paper, LinearProgress, Button } from "@mui/material";
 
 const HomeScreen = ({ user = "User" }) => {
-  // Sample progress data (Replace with actual data from your API or state)
+  const navigate = useNavigate(); // Hook for navigation
   const progressData = {
     quizzesTaken: 7,
     totalQuizzes: 10,
     chaptersCompleted: 15,
     totalChapters: 20,
   };
-
   const [name, setName] = useState("");
 
   const fetchProfile = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/auth/profile/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Replace with your token logic
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to fetch profile");
-        }
-  
-        const data = await response.json();
-        setName(data.username || ""); // Adjust key names based on your backend
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        alert("Error fetching profile. Please try again.");
+    try {
+      const response = await fetch("http://localhost:5000/auth/profile/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // Replace with your token logic
+        },
+      });
+
+      if (response.status === 401) {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("accessToken"); // Clear token if stored
+        navigate("/login"); // Redirect to login page
+        return;
       }
-    };
-  
-    useEffect(() => { fetchProfile(); }, []); // Fetch profile on component mount
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile");
+      }
+
+      const data = await response.json();
+      setName(data.username || ""); // Adjust key names based on your backend
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      alert("Error fetching profile. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []); // Fetch profile on component mount
 
   const calculatePercentage = (completed, total) => (completed / total) * 100;
 

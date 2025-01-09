@@ -30,7 +30,8 @@ const Sidebar = ({ setSelectedComponent }) => {
       }
 
       const data = await response.json();
-      console.log(localStorage.getItem('accessToken'));
+      console.log("Logout response:", data);  
+      localStorage.removeItem("accessToken");
       navigate('/');
     } catch (error) {
       console.error("Error fetching profile:", error);

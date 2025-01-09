@@ -28,40 +28,66 @@ const PDFChat = () => {
     scrollToBottom();
   }, [messages]);
 
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-        setSelectedFile(file);
-        const fileUrl = URL.createObjectURL(file);
-        setPdfUrl(fileUrl);
-    
-        // Create a FormData object to include the file in the POST request
-        const formData = new FormData();
-        formData.append('file', file);
-    
-        try {
-            const response = await fetch('http://127.0.0.1:5000/pdf/upload_document/', {
-            method: 'POST',
-            body: formData,
-            });
-    
-            if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                alert(`File uploaded successfully: ${data.filename}`);
-                // Handle successful upload (e.g., update state or UI)
-            } else {
-                alert(`Upload failed: ${data.message}`);
-            }
-            } else {
-            alert(`HTTP error! status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('An error occurred while uploading the file.');
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const fileUrl = URL.createObjectURL(file);
+      setPdfUrl(fileUrl);
+  
+      // Create a FormData object to include the file in the POST request
+      const formData = new FormData();
+      formData.append("file", file);
+  
+      try {
+        const response = await fetch("http://127.0.0.1:5000/pdf/upload_document/", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            alert(`File uploaded successfully: ${data.filename}`);
+            // Generate summary only after a successful upload
+            await generateSummary(data.filename);
+          } else {
+            alert(`Upload failed: ${data.message}`);
+          }
+        } else {
+          alert(`HTTP error! Status: ${response.status}`);
         }
-        }
-    };
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        alert("An error occurred while uploading the file.");
+      }
+    } else {
+      alert("No file selected. Please select a file to upload.");
+    }
+  };
+  
+  const generateSummary = async (filename) => {
+    try {
+      const newQuery = { role: "user", content: "Generate a summary of this document" };
+      setMessages((prevMessages) => [...prevMessages, newQuery]);
+      const response = await fetch("http://127.0.0.1:5000/pdf/summarize/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename }), // Use the filename from server response
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        const newMessage = { role: "assistant", content: data.summary };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      } else {
+        alert(data.message || "Query failed");
+      }
+    } catch (error) {
+      console.error("Error generating summary:", error);
+      alert("An error occurred while generating the summary.");
+    }
+  };
   
   const sendMessage = async () => {
     if (!prompt || !selectedFile) {
@@ -69,6 +95,9 @@ const PDFChat = () => {
       return;
     }
 
+    const newQuery = { role: "user", content: prompt };
+    setMessages((prevMessages) => [...prevMessages, newQuery]);
+    setPrompt("");
     try {
       const response = await fetch("http://127.0.0.1:5000/pdf/rag_query/", {
         method: "POST",
@@ -78,10 +107,8 @@ const PDFChat = () => {
 
       const data = await response.json();
       if (response.ok) {
-        const newQuery = { role: "user", content: prompt };
         const newMessage = { role: "assistant", content: data.response };
-        setMessages((prevMessages) => [...prevMessages, newQuery, newMessage]);
-        setPrompt("");
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
       } else {
         alert(data.message || "Query failed");
       }
@@ -188,7 +215,7 @@ const PDFChat = () => {
               }}
             >
               <Typography
-                dangerouslySetInnerHTML={{ __html: marked(message.content) }}
+                dangerouslySetInnerHTML={{ __html: message.content ? marked(message.content) : "" }}
                 sx={{
                   padding: "10px",
                   borderRadius: "5px",

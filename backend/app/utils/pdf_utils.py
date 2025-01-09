@@ -14,7 +14,7 @@ class RAGSystem:
     def __init__(self, 
                  pdf_path: str, 
                  api_key: Optional[str] = None,
-                 model_name: str = "gemini-pro"):
+                 model_name: str = "gemini-1.5-flash"):
         """Initialize RAG system with PDF and Gemini"""
         if api_key:
             genai.configure(api_key=api_key)
