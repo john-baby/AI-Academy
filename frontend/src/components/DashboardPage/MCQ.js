@@ -24,8 +24,8 @@ const MCQ = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
       const data = await response.json();
+      console.log(data.answer_key); 
       setQuestions(data.answer_key);
       setInputScreen(false); // Hide input screen after successful fetch
     } catch (error) {
@@ -141,6 +141,9 @@ const MCQ = () => {
               <p style={styles.correctAnswer}>
                 Correct Answer: {question.correct_answer_option}
               </p>
+              <p style={styles.explanation}>
+                Explanation: {question.explanation || "No explanation provided"}
+              </p>
             </div>
           ))}
         </div>
@@ -212,7 +215,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    // justifyContent: "center",
     backgroundColor: "#121212",
     color: "#ffffff",
     minHeight: "100vh",
@@ -226,8 +228,8 @@ const styles = {
     borderRadius: "8px",
     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
     marginBottom: "20px",
-    overflowY: "auto", // Enable vertical scrolling
-    maxHeight: "70vh", // Limit height to 70% of the viewport
+    overflowY: "auto",
+    maxHeight: "70vh",
   },
   reviewAnswer: {
     fontSize: "1rem",
@@ -237,7 +239,10 @@ const styles = {
     fontSize: "1rem",
     color: "#4CAF50",
   },
-  
+  explanation: {
+    fontSize: "1rem",
+    color: "#FFEB3B", // Changed to a better color for visibility
+  },
   heading: {
     fontSize: "2rem",
     marginBottom: "20px",

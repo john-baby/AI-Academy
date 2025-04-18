@@ -66,6 +66,73 @@ def delete_document(filename):
     except Exception as e:
         return jsonify({'success': False, 'message': f'Error deleting document: {str(e)}'}), 500
 
+# @pdf_bp.route('/rag_query/', methods=['POST'])
+# def rag_query():
+#     try:
+#         data = request.get_json()
+#         query = data.get("query")
+#         filename = data.get("filename")
+        
+#         if not query or not filename:
+#             return jsonify({
+#                 "status": "error",
+#                 "message": "Query and filename are required"
+#             }), 400
+        
+#         file_path = os.path.join(os.getenv('UPLOAD_FOLDER'), secure_filename(filename))
+#         if not os.path.exists(file_path):
+#             print(file_path)
+#             return jsonify({
+#                 "status": "error",
+#                 "message": f"File not found: {filename}"
+#             }), 404
+        
+#         rag_system = RAGSystem(pdf_path=file_path, api_key=os.getenv('GOOGLE_API_KEY'))
+#         response = rag_system.generate_response(query)
+#         return jsonify({
+#             "status": "success",
+#             "response": response
+#         })
+    
+#     except Exception as e:
+#         return jsonify({
+#             "status": "error",
+#             "message": str(e)
+#         }), 500
+
+# @pdf_bp.route('/summarize/', methods=['POST'])
+# def summarize():
+#     try:
+#         data = request.get_json()
+#         filename = data.get("filename")
+        
+#         if not filename:
+#             return jsonify({
+#                 "status": "error",
+#                 "message": "Filename is required"
+#             }), 400
+        
+#         file_path = os.path.join(os.getenv('UPLOAD_FOLDER'), secure_filename(filename))
+#         if not os.path.exists(file_path):
+#             return jsonify({
+#                 "status": "error",
+#                 "message": f"File not found: {filename}"
+#             }), 404
+        
+#         rag_system = RAGSystem(pdf_path=file_path, api_key=os.getenv('GOOGLE_API_KEY'))
+#         summary = rag_system.generate_response("Please provide a comprehensive summary of this document.")
+        
+#         return jsonify({
+#             "status": "success",
+#             "summary": summary
+#         })
+    
+#     except Exception as e:
+#         return jsonify({
+#             "status": "error",
+#             "message": str(e)
+#         }), 500
+
 @pdf_bp.route('/rag_query/', methods=['POST'])
 def rag_query():
     try:
@@ -81,14 +148,15 @@ def rag_query():
         
         file_path = os.path.join(os.getenv('UPLOAD_FOLDER'), secure_filename(filename))
         if not os.path.exists(file_path):
-            print(file_path)
             return jsonify({
                 "status": "error",
                 "message": f"File not found: {filename}"
             }), 404
         
+        # Use existing FAISS index if available
         rag_system = RAGSystem(pdf_path=file_path, api_key=os.getenv('GOOGLE_API_KEY'))
         response = rag_system.generate_response(query)
+        
         return jsonify({
             "status": "success",
             "response": response
@@ -99,6 +167,7 @@ def rag_query():
             "status": "error",
             "message": str(e)
         }), 500
+
 
 @pdf_bp.route('/summarize/', methods=['POST'])
 def summarize():
@@ -119,6 +188,7 @@ def summarize():
                 "message": f"File not found: {filename}"
             }), 404
         
+        # Use stored FAISS index
         rag_system = RAGSystem(pdf_path=file_path, api_key=os.getenv('GOOGLE_API_KEY'))
         summary = rag_system.generate_response("Please provide a comprehensive summary of this document.")
         

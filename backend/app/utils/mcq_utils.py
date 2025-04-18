@@ -22,6 +22,7 @@ class MCQGenerator:
                 "question": "Question text",
                 "options": ["Option A", "Option B", "Option C", "Option D"],
                 "correct_answer": "Option A or Option B or Option C or OptionD"
+                "explanation": "Explanation for the correct answer"
             }},
             ...
         ]
@@ -46,7 +47,8 @@ class MCQGenerator:
                 "question_number": i,
                 "question": q['question'],
                 "options": q['options'],
-                "correct_answer_option": q['correct_answer']
+                "correct_answer_option": q['correct_answer'],
+                "explanation": q['explanation'],
             }
             full_mcqs.append(full_mcq)
         

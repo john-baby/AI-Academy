@@ -8,5 +8,5 @@ chat_bp = Blueprint('model', __name__)
 @jwt_required()
 def handle_get_response():
     data = request.json
-    response = get_response(data['chapter_name'])
+    response = get_response(data['prevMessages'],data['prompt'],data['model'])
     return jsonify({'response': response})

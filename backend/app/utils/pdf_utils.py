@@ -1,3 +1,4 @@
+import os
 import google.generativeai as genai
 from typing import List, Optional
 from PyPDF2 import PdfReader
@@ -9,6 +10,7 @@ ALLOWED_EXTENSIONS = {'pdf', 'txt', 'doc', 'docx'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+import os
 
 class RAGSystem:
     def __init__(self, 
@@ -18,17 +20,38 @@ class RAGSystem:
         """Initialize RAG system with PDF and Gemini"""
         if api_key:
             genai.configure(api_key=api_key)
-        
+
         self.model = genai.GenerativeModel(model_name)
         self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        self.vector_store = None
-        self._process_pdf(pdf_path)
 
-    def _process_pdf(self, pdf_path: str) -> None:
+        # Use PDF filename to create unique FAISS index
+        pdf_filename = os.path.basename(pdf_path).split('.')[0]
+        self.faiss_index_path = f"faiss_index_{pdf_filename}"
+
+        # Load or process PDF
+        self._load_or_process_pdf(pdf_path)
+
+    def _load_or_process_pdf(self, pdf_path: str) -> None:
+        """Load FAISS index if exists; otherwise, process the PDF and save embeddings"""
+        if os.path.exists(self.faiss_index_path):
+            print(f"Loading existing FAISS index: {self.faiss_index_path}")
+            try:
+                self.vector_store = FAISS.load_local(
+                    self.faiss_index_path, 
+                    self.embeddings,
+                    allow_dangerous_deserialization=True
+                )
+            except Exception as e:
+                print(f"Error loading FAISS index: {str(e)}. Rebuilding index...")
+                self._process_pdf_and_save(pdf_path)
+        else:
+            print(f"Processing PDF and generating embeddings for {pdf_path}...")
+            self._process_pdf_and_save(pdf_path)
+
+    def _process_pdf_and_save(self, pdf_path: str) -> None:
+        """Process PDF, generate embeddings, and save FAISS index"""
         pdf_reader = PdfReader(pdf_path)
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
+        text = "".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
 
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
@@ -37,6 +60,10 @@ class RAGSystem:
         )
         chunks = text_splitter.split_text(text=text)
         self.vector_store = FAISS.from_texts(chunks, self.embeddings)
+
+        # Save FAISS index uniquely for each file
+        self.vector_store.save_local(self.faiss_index_path)
+
 
     def retrieve_context(self, query: str, top_k: int = 3) -> List[str]:
         """Retrieve most relevant chunks for a query"""
